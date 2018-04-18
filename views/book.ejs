@@ -1,0 +1,20 @@
+<% include partials/header %>
+
+  <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title"><%= book.title %></h5>
+        <br>
+        <h6 class="card-subtitle mb-2 text-muted">Description: </h6>
+        <p class="card-text"><%= book.description %></p>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Author: <%= book.author %></li>
+        <li class="list-group-item">Genre: <%= book.genre %></li>
+        <li class="list-group-item">Price: <%= book.price %></li>
+        <li class="list-group-item">Publish date: <%= book.publish_date %></li>
+      </ul>
+    </div>
+
+<% include partials/footer %>
+
+

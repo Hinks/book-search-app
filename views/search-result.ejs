@@ -1,0 +1,19 @@
+<% include partials/header %>
+
+  <% include partials/search %>
+
+  <% if(books.length < 1){ %>
+    <p>No books found</p>
+  <% } else{ %>  
+
+    <div class="list-group">
+
+        <% books.forEach( book => { %>
+          <a href="<%= book.link %>" class="list-group-item"><%= book.title %></a>
+        <% }) %>
+
+    </div>
+
+ <% } %>
+
+<% include partials/footer %>
