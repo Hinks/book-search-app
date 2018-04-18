@@ -3,18 +3,39 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const fs = require('fs')
 const xml2js = require('xml2js')
+const Rx = require("rxjs")
 
 const app = express()
 
-//View engine
+const parser = new xml2js.Parser({
+  explicitArray : false, 
+  valueProcessors: [ xml2js.processors.parseNumbers ]
+});
+
+// The parsed xml-file will be cached,
+// so subsequent subscribes will recieve the data immediately
+const subject$ = new Rx.AsyncSubject()
+
+const readFile$ = Rx.Observable.bindNodeCallback(fs.readFile)
+const fileSource$ = readFile$(__dirname + '/public/books.xml')
+
+const parseXML$ = Rx.Observable.bindNodeCallback(parser.parseString)
+
+const xmlSource$ = fileSource$.map(file => parseXML$(file))
+xmlSource$
+  .concatAll()
+  .subscribe(subject$)
+
+
+// View engine
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
-//body parser as middleware
+// Body parser as middleware
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: false}))
 
-//static path
+// Static path
 app.use(express.static(path.join(__dirname, 'public')))
 
 app.get('/', (req, res) => {
@@ -22,38 +43,41 @@ app.get('/', (req, res) => {
 })
 
 app.get('/api/book/:id', (req, res) => {
-  const bookId = req.params.id
-  const book = BOOKS.filter(book => book["$"]["id"] === bookId)
-  console.log(` the founded book: ${JSON.stringify(book[0])}`)
 
-  res.render('book', {book: book[0]})
+  const bookId = req.params.id
+
+  subject$.subscribe(
+    parsedXML => {
+
+      const books = parsedXML.catalog.book
+      const firstBook = books.filter(book => book["$"]["id"] === bookId)[0]
+
+      res.render('book', {book: firstBook}, (err, html) => {
+        (err) ? res.send("error") : res.send(html)
+      })
+    },
+    err => console.log("error"))
+  
 })
 
 app.get('/api/books', (req, res) => {
   const title = req.query.title
-  const filteredTitles = BOOKS
-    .filter(book => book.title.includes(title))
-    .map(book => {
-      return {
-        title: book.title, 
-        link: `/api/book/${book["$"]["id"]}`
-      }
-    })
 
-  res.render('search-result', {books: filteredTitles})
+  subject$.subscribe(
+    parsedXML => {
+
+      const filteredTitles = parsedXML.catalog.book
+        .filter(book => book.title.includes(title))
+        .map(book => {
+          return {
+            title: book.title, 
+            link: `/api/book/${book["$"]["id"]}`
+          }
+        })
+        res.render('search-result', {books: filteredTitles})
+    },
+    err => console.log("error"))
 })
 
-fs.readFile(__dirname + '/public/books.xml', (err, data) => {
-
-  const parserOptions = {
-    explicitArray : false, 
-    valueProcessors: [ xml2js.processors.parseNumbers ]
-  }
-  const parser = new xml2js.Parser(parserOptions);
-  
-  parser.parseString(data, (err, result) => {
-      BOOKS = result.catalog.book
-      app.listen(3000, () => console.log('Example app listening on port 3000!'))
-  });
-});
+app.listen(3000, () => console.log('Example app listening on port 3000!'))
 
