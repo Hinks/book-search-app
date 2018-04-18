@@ -12,16 +12,17 @@ const parser = new xml2js.Parser({
   valueProcessors: [ xml2js.processors.parseNumbers ]
 });
 
-// The parsed xml-file will be cached,
-// so subsequent subscribes will recieve the data immediately
+
 const subject$ = new Rx.AsyncSubject()
 
 const readFile$ = Rx.Observable.bindNodeCallback(fs.readFile)
 const fileSource$ = readFile$(__dirname + '/public/books.xml')
 
 const parseXML$ = Rx.Observable.bindNodeCallback(parser.parseString)
-
 const xmlSource$ = fileSource$.map(file => parseXML$(file))
+
+// The parsed xml-file will be cached after it has been loaded and parsed in the subject.
+// Subsequent subscribes will recieve the data immediately.
 xmlSource$
   .concatAll()
   .subscribe(subject$)
@@ -48,11 +49,11 @@ app.get('/api/book/:id', (req, res) => {
 
   subject$.subscribe(
     parsedXML => {
-
+        
       const books = parsedXML.catalog.book
-      const firstBook = books.filter(book => book["$"]["id"] === bookId)[0]
+      const theBook = books.filter(book => book["$"]["id"] === bookId)[0]
 
-      res.render('book', {book: firstBook}, (err, html) => {
+      res.render('book', {book: theBook}, (err, html) => {
         (err) ? res.send("error") : res.send(html)
       })
     },
@@ -66,7 +67,7 @@ app.get('/api/books', (req, res) => {
   subject$.subscribe(
     parsedXML => {
 
-      const filteredTitles = parsedXML.catalog.book
+      const matchingTitles = parsedXML.catalog.book
         .filter(book => book.title.includes(title))
         .map(book => {
           return {
@@ -74,7 +75,7 @@ app.get('/api/books', (req, res) => {
             link: `/api/book/${book["$"]["id"]}`
           }
         })
-        res.render('search-result', {books: filteredTitles})
+        res.render('search-result', {books: matchingTitles})
     },
     err => console.log("error"))
 })

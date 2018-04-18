@@ -1,11 +1,15 @@
 <div class="w-50 p-3">
     <form action="/api/books" method="get">
       <div class="form-group">
-        <label for="title">Search by title</label>
-        <input type="text" class="form-control" id="title" name="title" placeholder="title" required>
+        <label >Search books based on:</label>
+        <input type="text" class="form-control" id="title" name="title" placeholder="Title">
+        
+        <input type="text" class="form-control" id="author" name="author" placeholder="Author">
+
+        <input type="text" class="form-control" id="genre" name="genre" placeholder="Genre">
+
+        <input type="text" class="form-control" id="price" name="price" placeholder="Price">
       </div>
-      <button type="submit" class="btn btn-primary btn-lg btn-block">Search books!</button>
+      <button type="submit" class="btn btn-primary btn-lg btn-block">Search!</button>
   </form>
 </div>
-
-
