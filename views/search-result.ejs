@@ -6,7 +6,7 @@
     <p>No books found</p>
   <% } else{ %>  
 
-    <div class="list-group">
+    <div class="list-group w-50 p-3">
 
         <% books.forEach( book => { %>
           <a href="<%= book.link %>" class="list-group-item"><%= book.title %></a>
