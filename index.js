@@ -4,7 +4,7 @@ const path = require('path')
 const fs = require('fs')
 const xml2js = require('xml2js')
 const Rx = require('rxjs')
-const bookSearch = require('./search.js')
+const bookSearch = require('./src/search.js')
 
 const app = express()
 
