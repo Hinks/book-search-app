@@ -7,7 +7,7 @@ foo@bar:~$ git clone https://github.com/Hinks/book-search-app.git
 ```
 2.
 ```console
-foo@bar:~$ cd book-search-app
+foo@bar:~$ cd book-search-app/
 ```
 3.
 ```console
