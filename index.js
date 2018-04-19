@@ -46,12 +46,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/book/:id', (req, res) => {
 
-  const bookId = req.params.id
-
   subject$.subscribe(
     parsedXML => {
         
-      queryById = {id: bookId}
+      queryById = {id: req.params.id}
       const matchingBooks = bookSearch.searchByQuery(parsedXML.catalog.book, queryById)
       const theBook = matchingBooks[0]
 
@@ -64,7 +62,6 @@ app.get('/api/book/:id', (req, res) => {
 })
 
 app.get('/api/books', (req, res) => {
-  const title = req.query.title
 
   subject$.subscribe(
     parsedXML => {
