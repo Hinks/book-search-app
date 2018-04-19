@@ -10,37 +10,37 @@ const includesText = (text , bookField) =>
   bookField.toLowerCase().includes(text.toLowerCase())
 
 const fieldMatches = {
+  id: queryField => book => book["$"]["id"] === queryField,
   title: queryField => book => includesText(queryField, book.title),
   author: queryField => book => includesText(queryField, book.author),
   genre: queryField => book => includesText(queryField, book.genre),
   price: queryField => book => book.price < parseFloat(queryField)
 }
 
-const matchBook = 
-  cleanQuery =>
-    book => {
+const matchBook = cleanQuery => book => {
       
-      queryFields = Object.entries(cleanQuery)
+  queryFields = Object.entries(cleanQuery)
 
-      const pred = queryFields.reduce((acc, [key, val]) => {
-        const test = fieldMatches[key](val)(book)
-        acc.push(test)
-        return acc
-      }, [])
+  const pred = queryFields.reduce((acc, [key, val]) => {
+    const test = fieldMatches[key](val)(book)
+    acc.push(test)
+    return acc
+  }, [])
 
-      const identity = x => Boolean(x)
-      return pred.every(identity)
-
-    }
+  return pred.every(x => Boolean(x))
+}
 
 
-const search = (books, query) => {
+const searchByQuery = (books, query) => {
   
   const cleanedQuery = removeEmptyStrings(query)
   const matchQuery = matchBook(cleanedQuery)
 
   return books.filter(book => matchQuery(book))
+}
 
+module.exports = {
+  searchByQuery: searchByQuery
 }
 
 /*testing*/
@@ -77,6 +77,6 @@ const testQuery = {
   genre: "",
   price: ""
 }
-const filteredBooks = search(testBooks, testQuery)
+// const filteredBooks = searchByQuery(testBooks, testQuery)
 
-console.log(filteredBooks)
+// console.log(filteredBooks)

@@ -3,7 +3,8 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const fs = require('fs')
 const xml2js = require('xml2js')
-const Rx = require("rxjs")
+const Rx = require('rxjs')
+const bookSearch = require('./search.js')
 
 const app = express()
 
@@ -50,8 +51,9 @@ app.get('/api/book/:id', (req, res) => {
   subject$.subscribe(
     parsedXML => {
         
-      const books = parsedXML.catalog.book
-      const theBook = books.filter(book => book["$"]["id"] === bookId)[0]
+      queryById = {id: bookId}
+      const matchingBooks = bookSearch.searchByQuery(parsedXML.catalog.book, queryById)
+      const theBook = matchingBooks[0]
 
       res.render('book', {book: theBook}, (err, html) => {
         (err) ? res.send("error") : res.send(html)
@@ -67,14 +69,14 @@ app.get('/api/books', (req, res) => {
   subject$.subscribe(
     parsedXML => {
 
-      const matchingTitles = parsedXML.catalog.book
-        .filter(book => book.title.includes(title))
-        .map(book => {
-          return {
-            title: book.title, 
-            link: `/api/book/${book["$"]["id"]}`
-          }
-        })
+      const matchingBooks = bookSearch.searchByQuery(parsedXML.catalog.book, req.query)
+      const matchingTitles = matchingBooks.map(book => {
+        return {
+          title: book.title, 
+          link: `/api/book/${book["$"]["id"]}`
+        }
+      })
+
         res.render('search-result', {books: matchingTitles})
     },
     err => console.log("error"))
