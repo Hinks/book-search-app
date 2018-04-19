@@ -3,7 +3,7 @@
 **Install instructions**:<br />
 1.
 ```console
-foo@bar:~$ git clone <this-project>
+foo@bar:~$ git clone https://github.com/Hinks/book-search-app.git
 ```
 2.
 ```console
@@ -17,3 +17,5 @@ foo@bar:~/.../book-search-app$ npm install
 ```console
 foo@bar:~/.../book-search-app$ node index.js
 ```
+5.
+Open browser and go to: localhost:3000/
