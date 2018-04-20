@@ -1,33 +1,12 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const path = require('path')
-const fs = require('fs')
-const xml2js = require('xml2js')
-const Rx = require('rxjs')
 const bookSearch = require('./src/search.js')
+const xmlToJsLoader = require('./src/xml-loader.js')
 
 const app = express()
 
-const parser = new xml2js.Parser({
-  explicitArray : false, 
-  valueProcessors: [ xml2js.processors.parseNumbers ]
-});
-
-
-const subject$ = new Rx.AsyncSubject()
-
-const readFile$ = Rx.Observable.bindNodeCallback(fs.readFile)
-const fileSource$ = readFile$(__dirname + '/public/books.xml')
-
-const parseXML$ = Rx.Observable.bindNodeCallback(parser.parseString)
-const xmlSource$ = fileSource$.map(file => parseXML$(file))
-
-// The parsed xml-file will be cached after it has been loaded and parsed in the subject.
-// Subsequent subscribes will recieve the data immediately.
-xmlSource$
-  .concatAll()
-  .subscribe(subject$)
-
+const books$ = xmlToJsLoader.loadBooks(__dirname + '/public/books.xml')
 
 // View engine
 app.set('view engine', 'ejs')
@@ -46,11 +25,11 @@ app.get('/', (req, res) => {
 
 app.get('/api/book/:id', (req, res) => {
 
-  subject$.subscribe(
-    parsedXML => {
+  books$.subscribe(
+    parsedBooks => {
         
       queryById = {id: req.params.id}
-      const matchingBooks = bookSearch.searchByQuery(parsedXML.catalog.book, queryById)
+      const matchingBooks = bookSearch.searchByQuery(parsedBooks.catalog.book, queryById)
       const theBook = matchingBooks[0]
 
       res.render('book', {book: theBook}, (err, html) => {
@@ -63,10 +42,10 @@ app.get('/api/book/:id', (req, res) => {
 
 app.get('/api/books', (req, res) => {
 
-  subject$.subscribe(
-    parsedXML => {
+  books$.subscribe(
+    parsedBooks => {
 
-      const matchingBooks = bookSearch.searchByQuery(parsedXML.catalog.book, req.query)
+      const matchingBooks = bookSearch.searchByQuery(parsedBooks.catalog.book, req.query)
       const matchingTitles = matchingBooks.map(book => {
         return {
           title: book.title, 
