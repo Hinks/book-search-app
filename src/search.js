@@ -19,7 +19,7 @@ const matchingRules = {
 
 const bookIsMatchingQuery = (query, rules) => book => {
       
-  queryFields = Object.entries(query)
+  const queryFields = Object.entries(query)
 
   const predicateList = queryFields.reduce((acc, [key, val]) => {
     const test = rules[key](val)(book)
