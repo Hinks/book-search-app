@@ -1,3 +1,11 @@
+/*
+  Function returns a new object with all pairs 
+  with empty sting values filtered away.
+
+  Example: 
+  >>> removeEmptyStrings({id: "B1", author: "", title: ""})
+  {id: "B1"}
+*/
 const removeEmptyStrings = (obj) => {
   let newObj = {};
   Object.keys(obj).forEach((prop) => {
@@ -17,6 +25,19 @@ const matchingRules = {
   price:  inputPrice  => book => book.price < parseFloat(inputPrice)
 }
 
+/*
+  Returns true if all fields in the query matches 
+  the book's associated properties.
+
+  Example 1:
+  >>> const query = {author: "joe", title: "ruby"}
+  >>> const book = {id: "B1", author: "joe", title: "ruby", price: 10}
+  >>> bookIsMatchingQuery(query, matchingRules)(book)
+  ture
+  >>> const query2 = {author: "joe", price: 5}
+  >>> bookIsMatchingQuery(query2, matchingRules)(book)
+  false
+*/
 const bookIsMatchingQuery = (query, rules) => book => {
       
   const queryFields = Object.entries(query)
@@ -27,7 +48,7 @@ const bookIsMatchingQuery = (query, rules) => book => {
     return acc
   }, [])
 
-  return predicateList.every(x => Boolean(x))
+  return predicateList.every(x => x)
 }
 
 
